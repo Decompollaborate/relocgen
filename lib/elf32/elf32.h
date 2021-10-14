@@ -44,12 +44,31 @@ struct Elf32
     uint32_t (*read32)(const uint8_t *);
 };
 
-enum
+enum Elf32_SectionTypes
 {
     SHT_NULL = 0,
     SHT_PROGBITS,
     SHT_SYMTAB,
     SHT_STRTAB,
+    SHT_RELA,
+    SHT_HASH,
+    SHT_DYNAMIC,
+    SHT_NOTE,
+    SHT_NOBITS,
+    SHT_REL,
+    SHT_SHLIB,
+    SHT_DYNSYM,
+    SHT_INIT_ARRAY = 14,
+    SHT_FINI_ARRAY,
+    SHT_PREINIT_ARRAY,
+    SHT_GROUP,
+    SHT_SYMTAB_SHNDX,
+    SHT_LOOS = 0x60000000,
+    SHT_HIOS = 0x6fffffff,
+    SHT_LOPROC = 0x70000000,
+    SHT_HIPROC = 0x7fffffff,
+    // SHT_LOUSER = 0x80000000,
+    // SHT_HIUSER = 0xffffffff,
 };
 
 struct Elf32_Section

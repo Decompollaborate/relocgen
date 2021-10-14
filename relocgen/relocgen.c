@@ -214,7 +214,7 @@ void test_func(const char *filename)
         }
     }
 
-    for (i = 0; i < 12; i++) {
+    for (i = 1; i < elf.shnum; i++) {
         struct Elf32_Section sect;
 
         if (!elf32_get_section(&elf, &sect, i)) {
@@ -222,16 +222,18 @@ void test_func(const char *filename)
             exit(-1);
             //util_fatal_error("invalid or corrupt ELF file");
         }
-        printf("%i: %s\n", i, sect.name);
-        printf("  type: 0x%X\n", sect.type);
-        printf("  flags: %i\n", sect.flags);
-        printf("  addr: %i\n", sect.addr);
-        printf("  offset: %i\n", sect.offset);
-        printf("  size: %i\n", sect.size);
-        printf("  link: %i\n", sect.link);
-        printf("  info: %i\n", sect.info);
-        printf("  addralign: %i\n", sect.addralign);
-        printf("  entsize: %i\n", sect.entsize);
+        if (sect.type < SHT_LOOS) {
+            printf("%i: %s\n", i, sect.name);
+            printf("  type: 0x%X\n", sect.type);
+            printf("  flags: %i\n", sect.flags);
+            printf("  addr: %i\n", sect.addr);
+            printf("  offset: %i\n", sect.offset);
+            printf("  size: %i\n", sect.size);
+            printf("  link: %i\n", sect.link);
+            printf("  info: %i\n", sect.info);
+            printf("  addralign: %i\n", sect.addralign);
+            printf("  entsize: %i\n", sect.entsize);
+        }
 
     }
 
