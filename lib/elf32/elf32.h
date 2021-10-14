@@ -59,6 +59,9 @@ struct Elf32_Section
     uint32_t flags;
     uint32_t addr;
     uint32_t offset;
+    uint32_t size;
+    uint32_t link;
+    uint32_t info;
     uint32_t addralign;
     uint32_t entsize;
 };
@@ -66,8 +69,16 @@ struct Elf32_Section
 struct Elf32_Symbol
 {
     const char *name;
-    uint32_t value;
+    uint32_t value; // Elf32_Addr
+    uint32_t size; // Elf32_Word
+    uint8_t info;
+    uint8_t other;
+    uint16_t shndx;
 };
+
+#define ELF32_ST_BIND(i)   ((i)>>4)
+#define ELF32_ST_TYPE(i)   ((i)&0xf)
+#define ELF32_ST_INFO(b,t) (((b)<<4)+((t)&0xf))
 
 bool elf32_init(struct Elf32 *e, const void *data, size_t size);
 bool elf32_get_section(struct Elf32 *e, struct Elf32_Section *sec, int secnum);

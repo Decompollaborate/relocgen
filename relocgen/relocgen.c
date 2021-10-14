@@ -203,10 +203,36 @@ void test_func(const char *filename)
             exit(-1);
             //util_fatal_error("invalid or corrupt ELF file");
         }
-        printf("%s %i\n", syms[numRomSymbols].name, syms[numRomSymbols].value);
+        if (syms[numRomSymbols].shndx != 0) {
+            printf("%s %i\n", syms[numRomSymbols].name, syms[numRomSymbols].value);
+            printf("  info:  %i %i\n", ELF32_ST_BIND(syms[numRomSymbols].info), ELF32_ST_TYPE(syms[numRomSymbols].info));
+            printf("  other: %i\n", syms[numRomSymbols].other);
+            printf("  shndx: %i\n", syms[numRomSymbols].shndx);
+        }
         if (strstr(syms[numRomSymbols].name, "Rom")) {
             numRomSymbols++;
         }
+    }
+
+    for (i = 0; i < 12; i++) {
+        struct Elf32_Section sect;
+
+        if (!elf32_get_section(&elf, &sect, i)) {
+            fprintf(stderr, "err\n");
+            exit(-1);
+            //util_fatal_error("invalid or corrupt ELF file");
+        }
+        printf("%i: %s\n", i, sect.name);
+        printf("  type: 0x%X\n", sect.type);
+        printf("  flags: %i\n", sect.flags);
+        printf("  addr: %i\n", sect.addr);
+        printf("  offset: %i\n", sect.offset);
+        printf("  size: %i\n", sect.size);
+        printf("  link: %i\n", sect.link);
+        printf("  info: %i\n", sect.info);
+        printf("  addralign: %i\n", sect.addralign);
+        printf("  entsize: %i\n", sect.entsize);
+
     }
 
 #if 0
