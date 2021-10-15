@@ -237,6 +237,33 @@ void test_func(const char *filename)
 
     }
 
+    printf("\nrel:\n");
+    
+    for (i = 0; i < elf.shnum; i++)
+    {
+        struct Elf32_Section sec;
+        elf32_get_section(&elf, &sec, i);
+        
+        if (sec.type == SHT_REL)
+        {
+            printf("%i: \n", i);
+
+            for (size_t j = 0; j < sec.size / sec.entsize; j++) {
+                struct Elf32_Rel rel;
+
+                if (!elf32_get_rel(&elf, &rel, &sec, j)) {
+                    fprintf(stderr, "rel err\n");
+                    exit(1);
+                }
+
+                printf(" j: %zu\n", j);
+                printf("  offset: 0x%04X\n", rel.offset);
+                printf("  SYM:    0x%04X\n", ELF32_R_SYM(rel.info));
+                printf("  TYPE:   0x%04X\n", ELF32_R_TYPE(rel.info));
+            }
+        }
+    }
+
 #if 0
     qsort(syms, numRomSymbols, sizeof(struct Elf32_Symbol), cmp_symbol_by_name);
 

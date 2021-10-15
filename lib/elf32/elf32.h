@@ -95,12 +95,28 @@ struct Elf32_Symbol
     uint16_t shndx;
 };
 
+struct Elf32_Rel {
+	uint32_t offset; // Elf32_Addr
+	uint32_t info; // Elf32_Word
+};
+
+// Symbol table macros
+// i: Elf32_Symbol::info
 #define ELF32_ST_BIND(i)   ((i)>>4)
+// i: Elf32_Symbol::info
 #define ELF32_ST_TYPE(i)   ((i)&0xf)
+// bitpacks Elf32_Symbol::info
 #define ELF32_ST_INFO(b,t) (((b)<<4)+((t)&0xf))
 
+// REL macros
+#define ELF32_R_SYM(i)	((i)>>8)
+#define ELF32_R_TYPE(i)   ((uint8_t)(i))
+#define ELF32_R_INFO(s,t) (((s)<<8)+(uint8_t)(t))
+
 bool elf32_init(struct Elf32 *e, const void *data, size_t size);
+const void *elf32_get_section_contents(struct Elf32 *e, int secnum);
 bool elf32_get_section(struct Elf32 *e, struct Elf32_Section *sec, int secnum);
 bool elf32_get_symbol(struct Elf32 *e, struct Elf32_Symbol *sym, int symnum);
+bool elf32_get_rel(const struct Elf32 *e, struct Elf32_Rel *rel, const struct Elf32_Section *sec, int relnum);
 
 #endif

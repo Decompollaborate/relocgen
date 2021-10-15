@@ -39,7 +39,7 @@ static const void *get_section_header(struct Elf32 *e, int secnum)
     return e->data + secoffset;
 }
 
-static const void *get_section_contents(struct Elf32 *e, int secnum)
+const void *elf32_get_section_contents(struct Elf32 *e, int secnum)
 {
     size_t secoffset = e->shoff + secnum * 0x28;
     size_t dataoffset;
@@ -123,7 +123,7 @@ bool elf32_init(struct Elf32 *e, const void *data, size_t size)
         
         if (type == SHT_STRTAB)
         {
-            const char *strings = get_section_contents(e, e->shstrndx);
+            const char *strings = elf32_get_section_contents(e, e->shstrndx);
             const char *secname = strings + e->read32(sechdr + 0);
             
             if (strcmp(secname, ".strtab") == 0)
@@ -138,7 +138,7 @@ bool elf32_init(struct Elf32 *e, const void *data, size_t size)
     if (e->symtabndx != -1)
     {
         const uint8_t *sechdr = get_section_header(e, e->symtabndx);
-        //const uint8_t *symtab = get_section_contents(e, e->symtabndx);
+        //const uint8_t *symtab = elf32_get_section_contents(e, e->symtabndx);
         
         e->numsymbols = e->read32(sechdr + 0x14) / e->read32(sechdr + 0x24);
     }
@@ -152,7 +152,7 @@ bool elf32_init(struct Elf32 *e, const void *data, size_t size)
 bool elf32_get_section(struct Elf32 *e, struct Elf32_Section *sec, int secnum)
 {
     const uint8_t *sechdr = get_section_header(e, secnum);
-    const char *strings = get_section_contents(e, e->shstrndx);
+    const char *strings = elf32_get_section_contents(e, e->shstrndx);
 
     sec->name      = strings + e->read32(sechdr + 0);
     sec->type      = e->read32(sechdr + 0x04);
@@ -178,8 +178,8 @@ bool elf32_get_symbol(struct Elf32 *e, struct Elf32_Symbol *sym, int symnum)
         return false;
 
     sechdr = get_section_header(e, e->symtabndx);
-    symtab = get_section_contents(e, e->symtabndx);
-    strings = get_section_contents(e, e->strtabndx);
+    symtab = elf32_get_section_contents(e, e->symtabndx);
+    strings = elf32_get_section_contents(e, e->strtabndx);
 
     // size / entsize
     symcount = e->read32(sechdr + 0x14) / e->read32(sechdr + 0x24);
@@ -192,5 +192,23 @@ bool elf32_get_symbol(struct Elf32 *e, struct Elf32_Symbol *sym, int symnum)
     sym->info = *(symtab + symnum * 0x10 + 0x0C);
     sym->other = *(symtab + symnum * 0x10 + 0x0D);
     sym->shndx = e->read16(symtab + symnum * 0x10 + 0x0E);
+    return true;
+}
+
+bool elf32_get_rel(const struct Elf32 *e, struct Elf32_Rel *rel, const struct Elf32_Section *sec, int relnum) {
+    if (sec->type != SHT_REL) {
+        return false;
+    }
+
+    int elemcount = sec->size / sec->entsize;
+    if (relnum < 0 || relnum >= elemcount) {
+        return false;
+    }
+
+    const uint8_t* contents = e->data + sec->offset;
+
+    rel->offset = e->read32(contents + relnum * 0x08 + 0x00);
+    rel->info = e->read32(contents + relnum * 0x08 + 0x04);
+
     return true;
 }
