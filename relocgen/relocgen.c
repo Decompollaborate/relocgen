@@ -237,13 +237,16 @@ void test_func(const char *filename)
 
     }
 
+
+    size_t relocCount = 0;
+
     printf("\nrel:\n");
-    
+
     for (i = 0; i < elf.shnum; i++)
     {
         struct Elf32_Section sec;
         elf32_get_section(&elf, &sec, i);
-        
+
         if (sec.type == SHT_REL)
         {
             printf("%i: \n", i);
@@ -256,13 +259,30 @@ void test_func(const char *filename)
                     exit(1);
                 }
 
-                printf(" j: %zu\n", j);
-                printf("  offset: 0x%04X\n", rel.offset);
-                printf("  SYM:    0x%04X\n", ELF32_R_SYM(rel.info));
-                printf("  TYPE:   0x%04X\n", ELF32_R_TYPE(rel.info));
+                struct Elf32_Symbol sym;
+                if (!elf32_get_symbol(&elf, &sym, ELF32_R_SYM(rel.info))) {
+                    fprintf(stderr, "error getting rel symbol\n");
+                    exit(1);
+                }
+
+                if (sym.shndx != 0) {
+                    printf(" j: %zu\n", j);
+                    printf("  offset: 0x%04X\n", rel.offset);
+                    printf("  SYM:    0x%04X\n", ELF32_R_SYM(rel.info));
+                    printf("  TYPE:   0x%04X\n", ELF32_R_TYPE(rel.info));
+
+                    printf("    %s %i\n", sym.name, sym.value);
+                    printf("      info:  %i %i\n", ELF32_ST_BIND(sym.info), ELF32_ST_TYPE(sym.info));
+                    printf("      other: %i\n", sym.other);
+                    printf("      shndx: %i\n", sym.shndx);
+
+                    relocCount++;
+                }
             }
         }
     }
+
+    printf("reloc count: %zu\n", relocCount);
 
 #if 0
     qsort(syms, numRomSymbols, sizeof(struct Elf32_Symbol), cmp_symbol_by_name);
